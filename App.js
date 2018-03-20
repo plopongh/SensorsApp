@@ -11,32 +11,72 @@ import {
   Text,
   View
 } from 'react-native';
+import  { Accelerometer, Gyroscope } from 'react-native-sensors';
 
-
-
-const instructions = Platform.select({
-  ios: 'Press Cmd+R to reload,\n' +
-    'Cmd+D or shake for dev menu',
-  android: 'Double tap R on your keyboard to reload,\n' +
-    'Shake or press menu button for dev menu',
+const accelerationObservable = new Accelerometer({
+  updateInterval: 100, // defaults to 100ms
 });
 
-type Props = {};
-export default class App extends Component<Props> {
+const gyroscopeObservable = new Gyroscope({
+  updateInterval: 2000, // defaults to 100ms
+});
+
+export default class App extends Component{
+  constructor(props) {
+    super(props);
+    this.state = {
+      acceleration: {
+        x: 'unknown',
+        y: 'unknown',
+        z: 'unknown',
+      },
+      gyroscope: {
+        x: 'unknown',
+        y: 'unknown',
+        z: 'unknown',
+      }
+    };
+  }
+
+  componentWillMount() {
+    accelerationObservable
+      .subscribe(acceleration => this.setState({
+        acceleration,
+      }));
+
+    gyroscopeObservable
+      .subscribe(gyroscope => this.setState({
+        gyroscope,
+      }));
+  }
+
   render() {
+
+    const {
+      acceleration,
+      gyroscope,
+    } = this.state;
+
     return (
       <View style={styles.container}>
         <Text style={styles.welcome}>
-          Welcome to React Native!
+          Acceleration:
         </Text>
         <Text style={styles.instructions}>
-          
+          {acceleration.x + '/' + acceleration.y + '/' + acceleration.z}
+        </Text>
+        <Text style={styles.welcome}>
+          Gyroscope:
         </Text>
         <Text style={styles.instructions}>
-          {instructions}
+          {gyroscope.x + '/' + gyroscope.y + '/' + gyroscope.z}
         </Text>
       </View>
     );
+  }
+  componentWillUnmount() {
+    accelerationObservable.stop();
+    gyroscopeObservable.stop();
   }
 }
 
